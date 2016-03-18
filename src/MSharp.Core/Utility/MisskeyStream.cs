@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Http;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using WebSocketSharp;
@@ -111,14 +113,18 @@ namespace MSharp.Core.Utility
 				var streamUrl = Session.Config.StreamingApiUrl;
 
 				var res = await Request.GET($"{streamUrl.Scheme}://{streamUrl.Host}:{streamUrl.Port}/socket.io/?EIO=3&transport=polling", null, cookie);
-				var config = DynamicJson.Parse(res.Content.Substring(5));
+
+				var configSrc = res.Content.Substring(5);
+
+				var sid = Regex.Match(configSrc, "\"sid\":\"?(.+?)\"?,").Groups[1].Value;
+				var pingInterval = int.Parse(Regex.Match(configSrc, "\"pingInterval\":\"?(.+?)\"?,").Groups[1].Value);
 
 				var content = new StringContent("17:40" + EndPoint);
-				res = await Request.POST($"{streamUrl.Scheme}://{streamUrl.Host}:{streamUrl.Port}/socket.io/?EIO=3&transport=polling&sid={config.sid}", content, cookie);
+				res = await Request.POST($"{streamUrl.Scheme}://{streamUrl.Host}:{streamUrl.Port}/socket.io/?EIO=3&transport=polling&sid={sid}", content, cookie);
 
 				await Task.Factory.StartNew(() =>
 				{
-					using (var ws = new WebSocket($"{(streamUrl.Scheme == "https" ? "wss" : "ws")}://{streamUrl.Host}:{streamUrl.Port}/socket.io/?EIO=3&transport=websocket&sid={config.sid}"))
+					using (var ws = new WebSocket($"{(streamUrl.Scheme == "https" ? "wss" : "ws")}://{streamUrl.Host}:{streamUrl.Port}/socket.io/?EIO=3&transport=websocket&sid={sid}"))
 					{
 						ws.OnMessage += (s, ev) =>
 						{
@@ -154,21 +160,34 @@ namespace MSharp.Core.Utility
 
 						while (ws.IsAlive && IsConnecting)
 						{
-							Task.Delay(5000, _Canceller.Token).Wait();
+							Task.Delay(pingInterval, _Canceller.Token).Wait();
 							ws.Send("2");
 						}
 						
 					}
 				}, _Canceller.Token);
 			}
-			catch (TaskCanceledException)
+			catch (AggregateException ex)
 			{
+				var exs = ex.InnerExceptions;
+				foreach(var i in exs)
+				{
+					if (!(i is TaskCanceledException))
+					{
+						Debug.WriteLine($"----------");
+						Debug.WriteLine($"Type:{i.GetType().Name}");
+						Debug.WriteLine($"Message:{i.Message}");
+						Debug.WriteLine($"StackTrace:{i.StackTrace}");
+						Debug.WriteLine($"----------");
+					}
+				}
 			}
 			catch (Exception ex)
 			{
 				Debug.WriteLine($"----------");
-				Debug.WriteLine(ex.Message);
-				Debug.WriteLine(ex.StackTrace);
+				Debug.WriteLine($"Type:{ex.GetType().Name}");
+				Debug.WriteLine($"Message:{ex.Message}");
+				Debug.WriteLine($"StackTrace:{ex.StackTrace}");
 				Debug.WriteLine($"----------");
 			}
 
