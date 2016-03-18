@@ -52,7 +52,7 @@
     <Compile Include="Data\HttpResponse.cs" />
     <Compile Include="Data\MessageRecieveEventArgs.cs" />
     <Compile Include="DynamicJson.cs" />
-    <Compile Include="SessionContext.cs" />
+    <Compile Include="SessionInfo.cs" />
     <Compile Include="Utility\MisskeyAuthorizer.cs" />
     <Compile Include="Utility\MisskeyRequest.cs" />
     <Compile Include="Utility\MisskeyStream.cs" />
