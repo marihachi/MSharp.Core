@@ -10,7 +10,7 @@ namespace MSharp.Core.Utility
 	/// <summary>
 	/// HTTPの簡易なリクエストを表します。
 	/// </summary>
-	public static class HttpRequest
+	public static class Request
 	{
 		/// <summary>
 		/// POSTリクエストを送信します。

@@ -57,7 +57,7 @@
     <Compile Include="Utility\MisskeyRequest.cs" />
     <Compile Include="Utility\MisskeyStream.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utility\HttpRequest.cs" />
+    <Compile Include="Utility\Request.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

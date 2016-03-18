@@ -110,11 +110,11 @@ namespace MSharp.Core.Utility
 
 				var streamUrl = Session.Config.StreamingApiUrl;
 
-				var res = await HttpRequest.GET($"{streamUrl.Scheme}://{streamUrl.Host}:{streamUrl.Port}/socket.io/?EIO=3&transport=polling", null, cookie);
+				var res = await Request.GET($"{streamUrl.Scheme}://{streamUrl.Host}:{streamUrl.Port}/socket.io/?EIO=3&transport=polling", null, cookie);
 				var config = DynamicJson.Parse(res.Content.Substring(5));
 
 				var content = new StringContent("17:40" + EndPoint);
-				res = await HttpRequest.POST($"{streamUrl.Scheme}://{streamUrl.Host}:{streamUrl.Port}/socket.io/?EIO=3&transport=polling&sid=" + config.sid, content, cookie);
+				res = await Request.POST($"{streamUrl.Scheme}://{streamUrl.Host}:{streamUrl.Port}/socket.io/?EIO=3&transport=polling&sid=" + config.sid, content, cookie);
 
 				await Task.Factory.StartNew(() =>
 				{

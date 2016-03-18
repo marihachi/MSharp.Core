@@ -14,7 +14,7 @@ namespace MSharp.Core.Utility
 		/// <returns></returns>
 		public static async Task<SessionInfo> Authorize(SessionInfo session, string username, string password)
 		{
-			var res = await HttpRequest.GET(session.Config.LoginUrl.AbsoluteUri);
+			var res = await Request.GET(session.Config.LoginUrl.AbsoluteUri);
 
 			var cookies = res.Cookies;
 			var csrfToken = Regex.Match(res.Content, "<meta name=\"csrf-token\" content=\"([a-zA-Z0-9_-]+)\">").Groups[1].ToString();
@@ -24,7 +24,7 @@ namespace MSharp.Core.Utility
 			param.Add("screen-name", username);
 			param.Add("password", password);
 
-			res = await HttpRequest.POST(session.Config.LoginUrl.AbsoluteUri, param, cookies);
+			res = await Request.POST(session.Config.LoginUrl.AbsoluteUri, param, cookies);
 
 			return res.Content == "OK" ? new SessionInfo(csrfToken, cookies[session.Config.SessionKeyName], session.Config) : null;
 		}

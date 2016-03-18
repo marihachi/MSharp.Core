@@ -19,7 +19,7 @@ namespace MSharp.Core.Utility
 			var cookies = new Dictionary<string, string>();
 			cookies.Add(session.Config.SessionKeyName, session.SessionKey);
 
-			return await HttpRequest.GET($"{session.Config.ApiUrl.AbsoluteUri}{endPoint}", parameters, cookies);
+			return await Request.GET($"{session.Config.ApiUrl.AbsoluteUri}{endPoint}", parameters, cookies);
 		}
 
 		public static async Task<HttpResponse> POST(SessionInfo session, string endPoint, HttpContent content, Dictionary<string, string> extendHeaders = null)
@@ -31,7 +31,7 @@ namespace MSharp.Core.Utility
 			var cookies = new Dictionary<string, string>();
 			cookies.Add(session.Config.SessionKeyName, session.SessionKey);
 
-			return await HttpRequest.POST($"{session.Config.ApiUrl.AbsoluteUri}{endPoint}", content, cookies, extendHeaders);
+			return await Request.POST($"{session.Config.ApiUrl.AbsoluteUri}{endPoint}", content, cookies, extendHeaders);
 		}
 
 		public static async Task<HttpResponse> POST(SessionInfo session, string endPoint, Dictionary<string, string> parameters = null)
@@ -46,7 +46,7 @@ namespace MSharp.Core.Utility
 			var cookies = new Dictionary<string, string>();
 			cookies.Add(session.Config.SessionKeyName, session.SessionKey);
 
-			return await HttpRequest.POST($"{session.Config.ApiUrl.AbsoluteUri}{endPoint}", parameters, cookies);
+			return await Request.POST($"{session.Config.ApiUrl.AbsoluteUri}{endPoint}", parameters, cookies);
 		}
 
 		public static async Task<HttpResponse> POST(SessionInfo session, string endPoint, List<HttpContent> contents, Dictionary<string, string> additionalHeaders = null)
@@ -61,7 +61,7 @@ namespace MSharp.Core.Utility
 			var cookies = new Dictionary<string, string>();
 			cookies.Add(session.Config.SessionKeyName, session.SessionKey);
 
-			return await HttpRequest.POST($"{session.Config.ApiUrl.AbsoluteUri}{endPoint}", contents, cookies, additionalHeaders);
+			return await Request.POST($"{session.Config.ApiUrl.AbsoluteUri}{endPoint}", contents, cookies, additionalHeaders);
 		}
 	}
 }
