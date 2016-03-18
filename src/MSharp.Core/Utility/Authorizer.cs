@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace MSharp.Core.Utility
 {
-	public static class MisskeyAuthorizer
+	public static class Authorizer
 	{
 		/// <summary>
 		/// Misskeyへの認証を試みます。
