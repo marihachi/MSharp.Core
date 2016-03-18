@@ -114,11 +114,11 @@ namespace MSharp.Core.Utility
 				var config = DynamicJson.Parse(res.Content.Substring(5));
 
 				var content = new StringContent("17:40" + EndPoint);
-				res = await Request.POST($"{streamUrl.Scheme}://{streamUrl.Host}:{streamUrl.Port}/socket.io/?EIO=3&transport=polling&sid=" + config.sid, content, cookie);
+				res = await Request.POST($"{streamUrl.Scheme}://{streamUrl.Host}:{streamUrl.Port}/socket.io/?EIO=3&transport=polling&sid={config.sid}", content, cookie);
 
 				await Task.Factory.StartNew(() =>
 				{
-					using (var ws = new WebSocket($"{(streamUrl.Scheme == "https" ? "wss" : "ws")}://{streamUrl.Host}:{streamUrl.Port}/socket.io/?EIO=3&transport=websocket&sid=" + config.sid))
+					using (var ws = new WebSocket($"{(streamUrl.Scheme == "https" ? "wss" : "ws")}://{streamUrl.Host}:{streamUrl.Port}/socket.io/?EIO=3&transport=websocket&sid={config.sid}"))
 					{
 						ws.OnMessage += (s, ev) =>
 						{
