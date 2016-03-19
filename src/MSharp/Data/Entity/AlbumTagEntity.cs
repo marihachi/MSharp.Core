@@ -1,5 +1,4 @@
 ﻿using Codeplex.Data;
-using System;
 using System.Diagnostics;
 
 namespace MSharp.Data.Entity

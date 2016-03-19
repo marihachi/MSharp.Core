@@ -35,7 +35,7 @@ namespace MSharp.Data.Entity
 					Type = NotificationType.Mention;
 
 				Id = j.id;
-				Application = null; // TODO
+				ApplicationId = j.app() ? j.app : null;
 				CreatedAt = DateTime.Parse(j.createdAt);
 				Cursor = j.cursor() ? (int?)j.cursor : null;
 				IsRead = j.isRead() ? j.isRead : null;
@@ -49,7 +49,7 @@ namespace MSharp.Data.Entity
 
 		public NotificationType Type { get; set; } = NotificationType.Unknown;
 		public string Id { get; set; }
-		public object Application { get; set; }
+		public string ApplicationId { get; set; }
 		public DateTime CreatedAt { get; set; }
 		public int? Cursor { get; set; }
 		public bool? IsRead { get; set; }
@@ -59,7 +59,7 @@ namespace MSharp.Data.Entity
 	public interface INotification
 	{
 		string Id { get; set; }
-		object Application { get; set; }
+		string ApplicationId { get; set; }
 		DateTime CreatedAt { get; set; }
 		int? Cursor { get; set; }
 		bool? IsRead { get; set; }
