@@ -19,7 +19,7 @@ namespace MSharp.API
 		}
 		private Misskey _Misskey { get; set; }
 
-		public async Task<FileEntity> Upload(IFile file)
+		public async Task<AlbumFileEntity> Upload(IFile file)
 		{
 			var contents = new List<HttpContent>();
 
@@ -75,7 +75,7 @@ namespace MSharp.API
 			contents.Add(folder);
 
 			var res = await MisskeyRequest.POST(_Misskey.Session, "web/album/upload", contents);
-			return new FileEntity(res.Content);
+			return new AlbumFileEntity(res.Content);
 		}
 	}
 }

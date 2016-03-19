@@ -2,6 +2,7 @@
 using MSharp.Data.Entity.Enum;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace MSharp.Data.Entity
 {
@@ -11,6 +12,7 @@ namespace MSharp.Data.Entity
 		{
 			try
 			{
+				Debug.WriteLine("Post: "+jsonString);
 				var j = DynamicJson.Parse(jsonString);
 
 				if (j.type == "status")
@@ -23,15 +25,15 @@ namespace MSharp.Data.Entity
 					Type = PostType.Reply;
 
 				Id = j.id;
-				Application = null; // TODO
-				Channel = null; // TODO
+				ApplicationId = j.app() ? j.app : null;
+				ChannelId = j.channel() ? j.channel : null;
 				CreatedAt = DateTime.Parse(j.createdAt);
 				Cursor = j.cursor() ? (int?)j.cursor : null;
 				if (j.files() && j.files != null)
 				{
-					Files = new List<FileEntity>();
+					Files = new List<AlbumFileEntity>();
 					foreach (var file in j.files)
-						Files.Add(new FileEntity(file.ToString()));
+						Files.Add(new AlbumFileEntity(file.ToString()));
 				}
 				if (j.hashtags() && j.files != null)
 				{
@@ -54,17 +56,17 @@ namespace MSharp.Data.Entity
 			}
 			catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException ex)
 			{
-				Console.WriteLine(ex.Message);
+				Debug.WriteLine(ex.Message);
 			}
 		}
 
 		public PostType Type { get; set; } = PostType.Unknown;
 		public string Id { get; set; }
-		public object Application { get; set; }
-		public object Channel { get; set; }
+		public string ApplicationId { get; set; }
+		public string ChannelId { get; set; }
 		public DateTime CreatedAt { get; set; }
 		public int? Cursor { get; set; }
-		public List<FileEntity> Files { get; set; }
+		public List<AlbumFileEntity> Files { get; set; }
 		public List<string> Hashtags { get; set; }
 		public PostEntity InReplyToPost { get; set; }
 		public bool? IsDeleted { get; set; }
@@ -83,8 +85,8 @@ namespace MSharp.Data.Entity
 	public interface IPost
 	{
 		string Id { get; set; }
-		object Application { get; set; }
-		object Channel { get; set; }
+		string ApplicationId { get; set; }
+		string ChannelId { get; set; }
 		DateTime CreatedAt { get; set; }
 		int? Cursor { get; set; }
 		bool? IsDeleted { get; set; }
@@ -100,7 +102,7 @@ namespace MSharp.Data.Entity
 
 	public interface IStatus : IPost
 	{
-		List<FileEntity> Files { get; set; }
+		List<AlbumFileEntity> Files { get; set; }
 		List<string> Hashtags { get; set; }
 		string Text { get; set; }
 	}

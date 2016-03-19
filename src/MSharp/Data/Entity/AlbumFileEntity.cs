@@ -1,16 +1,18 @@
 ﻿using Codeplex.Data;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 
 namespace MSharp.Data.Entity
 {
-	public class FileEntity
+	public class AlbumFileEntity
 	{
-		public FileEntity(string jsonString)
+		public AlbumFileEntity(string jsonString)
 		{
 			try
 			{
+				Debug.WriteLine("AlbumFile: " + jsonString);
 				var j = DynamicJson.Parse(jsonString);
 
 				Id = j.id;
@@ -21,9 +23,9 @@ namespace MSharp.Data.Entity
 				Name = j.name() ? j.name : null;
 				if (j.tags() && j.tags != null)
 				{
-					Tags = new List<string>();
-					foreach (var i in j.tags)
-						Tags.Add(i);
+					Tags = new List<AlbumTagEntity>();
+					foreach (var tag in j.tags)
+						Tags.Add(new AlbumTagEntity(tag.ToString()));
 				}
 				if (j.properties())
 				{
@@ -44,7 +46,7 @@ namespace MSharp.Data.Entity
 			}
 			catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException ex)
 			{
-				Console.WriteLine(ex.Message);
+				Debug.WriteLine(ex.Message);
 			}
 		}
 
@@ -54,7 +56,7 @@ namespace MSharp.Data.Entity
 		public int? DataSize { get; set; }
 		public string MimeType { get; set; }
 		public string Name { get; set; }
-		public List<string> Tags { get; set; }
+		public List<AlbumTagEntity> Tags { get; set; }
 		public Size? ImageSize { get; set; }
 		public bool? IsPrivate { get; set; }
 		public bool? IsHidden { get; set; }

@@ -1,6 +1,7 @@
 ﻿using Codeplex.Data;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 namespace MSharp.Data.Entity
@@ -11,6 +12,7 @@ namespace MSharp.Data.Entity
 		{
 			try
 			{
+				Debug.WriteLine("User: " + jsonString);
 				var j = DynamicJson.Parse(jsonString);
 
 				Id = j.id;
@@ -57,7 +59,7 @@ namespace MSharp.Data.Entity
 			}
 			catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException ex)
 			{
-				Console.WriteLine(ex.Message);
+				Debug.WriteLine(ex.Message);
 			}
 		}
 

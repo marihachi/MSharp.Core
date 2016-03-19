@@ -1,6 +1,7 @@
 ﻿using Codeplex.Data;
 using MSharp.Data.Entity.Enum;
 using System;
+using System.Diagnostics;
 
 namespace MSharp.Data.Entity
 {
@@ -42,7 +43,7 @@ namespace MSharp.Data.Entity
 			}
 			catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException ex)
 			{
-				Console.WriteLine(ex.Message);
+				Debug.WriteLine(ex.Message);
 			}
 		}
 
