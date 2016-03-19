@@ -46,8 +46,9 @@
     <Compile Include="API\Posts.cs" />
     <Compile Include="API\Album.cs" />
     <Compile Include="API\HomeStream.cs" />
+    <Compile Include="Data\Entity\AlbumTagEntity.cs" />
     <Compile Include="Data\Entity\UserEntity.cs" />
-    <Compile Include="Data\Entity\FileEntity.cs" />
+    <Compile Include="Data\Entity\AlbumFileEntity.cs" />
     <Compile Include="Data\Entity\Enum\NotificationType.cs" />
     <Compile Include="Data\Entity\Enum\PostType.cs" />
     <Compile Include="Data\EventArgs\NotificationRecieveEventArgs.cs" />
