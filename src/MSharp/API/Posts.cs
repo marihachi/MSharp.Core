@@ -1,6 +1,8 @@
-﻿using MSharp.Core.Utility;
+﻿using Codeplex.Data;
+using MSharp.Core.Utility;
 using MSharp.Data;
 using MSharp.Data.Entity;
+using MSharp.Data.Entity.Enum;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -25,7 +27,7 @@ namespace MSharp.API
 		/// <returns></returns>
 		public async Task<PostEntity> Show(string postId)
 		{
-			if(string.IsNullOrEmpty(postId))
+			if (string.IsNullOrEmpty(postId))
 				throw new ArgumentNullException("postId");
 
 			var body = new Dictionary<string, string>();
@@ -47,6 +49,9 @@ namespace MSharp.API
 		/// <param name="fileIds"></param>
 		public async Task<PostEntity> Create(string text, List<string> fileIds)
 		{
+			if (string.IsNullOrEmpty(text))
+				throw new ArgumentNullException("text");
+
 			var body = new Dictionary<string, string>();
 			body.Add("text", text);
 
@@ -89,7 +94,7 @@ namespace MSharp.API
 			{
 				files = files.FindAll(i => i != null);
 
-				foreach(var i in files)
+				foreach (var i in files)
 				{
 					var res = await _Misskey.Album.Upload(i);
 					fileIds.Add(res.Id);
@@ -107,6 +112,84 @@ namespace MSharp.API
 		public async Task<PostEntity> Create(string text, IFile file = null)
 		{
 			return await Create(text, new List<IFile> { file });
+		}
+
+		/// <summary>
+		/// ホームタイムラインの内容を取得します。
+		/// </summary>
+		/// <returns></returns>
+		public async Task<List<PostEntity>> HomeTimeLine(int? limit = null, int? sinceCursor = null, int? maxCursor = null)
+		{
+			var body = new Dictionary<string, string>();
+
+			if (limit != null)
+			{
+				if (limit >= 1 && limit <= 100)
+					body.Add("limit", limit.ToString());
+				else
+					throw new ArgumentOutOfRangeException("limit は1～100の範囲内である必要があります。");
+			}
+
+			if (sinceCursor != null)
+				body.Add("since-cursor", sinceCursor.ToString());
+
+			if (maxCursor != null)
+				body.Add("max-cursor", maxCursor.ToString());
+
+			var res = (await MisskeyRequest.POST(_Misskey.Session, "posts/timeline", body)).Content;
+
+			var postList = new List<PostEntity>();
+
+			foreach (var post in DynamicJson.Parse(res))
+				postList.Add(new PostEntity(post.ToString()));
+
+			return postList;
+		}
+
+		/// <summary>
+		/// 指定ユーザーのポストを複数取得します。
+		/// </summary>
+		/// <returns></returns>
+		public async Task<List<PostEntity>> UserTimeLine(string userId, int? limit = null, HashSet<PostType> types = null, int? sinceCursor = null, int? maxCursor = null)
+		{
+			var body = new Dictionary<string, string>();
+
+			if (string.IsNullOrEmpty(userId))
+				throw new ArgumentNullException("userId");
+
+			body.Add("since-cursor", userId);
+
+			if (limit != null)
+			{
+				if (limit >= 1 && limit <= 100)
+					body.Add("limit", limit.ToString());
+				else
+					throw new ArgumentOutOfRangeException("limit は1～100の範囲内である必要があります。");
+			}
+
+			if (types != null)
+			{
+				foreach (var type in types)
+					if (type == PostType.Unknown)
+						throw new ArgumentException("引数'types'の項目に PostType.Unknown は指定できません。");
+
+				body.Add("types", string.Join(",", types));
+			}
+
+			if (sinceCursor != null)
+				body.Add("since-cursor", sinceCursor.ToString());
+
+			if (maxCursor != null)
+				body.Add("max-cursor", maxCursor.ToString());
+
+			var res = (await MisskeyRequest.POST(_Misskey.Session, "posts/user-timeline", body)).Content;
+
+			var postList = new List<PostEntity>();
+
+			foreach (var post in DynamicJson.Parse(res))
+				postList.Add(new PostEntity(post.ToString()));
+
+			return postList;
 		}
 	}
 }
