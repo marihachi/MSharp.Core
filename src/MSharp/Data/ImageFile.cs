@@ -21,13 +21,13 @@ namespace MSharp.Data
 		}
 
 		/// <summary>
-		/// 
+		/// ファイル名を取得します。
 		/// </summary>
-		public string FileName { get; set; }
+		public string FileName { get; private set; }
 
 		/// <summary>
-		/// 
+		/// イメージデータを取得します。
 		/// </summary>
-		public Image Data { get; set; }
+		public Image Data { get; private set; }
 	}
 }

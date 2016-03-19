@@ -5,6 +5,6 @@
 	/// </summary>
 	public interface IFile
 	{
-		string FileName { get; set; }
+		string FileName { get; }
 	}
 }
