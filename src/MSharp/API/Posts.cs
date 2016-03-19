@@ -1,6 +1,7 @@
 ﻿using MSharp.Core.Utility;
 using MSharp.Data;
 using MSharp.Data.Entity;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -16,6 +17,28 @@ namespace MSharp.API
 			_Misskey = misskey;
 		}
 		private Misskey _Misskey { get; set; }
+
+		/// <summary>
+		/// ポストのエンティティを取得します。
+		/// </summary>
+		/// <param name="postId"></param>
+		/// <returns></returns>
+		public async Task<PostEntity> Show(string postId)
+		{
+			if(string.IsNullOrEmpty(postId))
+				throw new ArgumentNullException("postId");
+
+			var body = new Dictionary<string, string>();
+
+			body.Add("post-id", postId);
+
+			var res = (await MisskeyRequest.POST(_Misskey.Session, "posts/show", body)).Content;
+
+			if (res == "not-found")
+				throw new ArgumentException("指定されたpostIdのポストは見つかりませんでした。");
+
+			return new PostEntity(res);
+		}
 
 		/// <summary>
 		/// ポストを投稿します。
@@ -38,7 +61,7 @@ namespace MSharp.API
 			var res = (await MisskeyRequest.POST(_Misskey.Session, "posts/create", body)).Content;
 
 			if (res == "content-duplicate")
-				throw new System.Exception("投稿内容が重複しています。");
+				throw new Exception("投稿内容が重複しています。");
 
 			return new PostEntity(res);
 		}
