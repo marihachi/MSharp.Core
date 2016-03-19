@@ -19,7 +19,7 @@ namespace MSharp.API
 		private Misskey _Misskey { get; set; }
 
 		/// <summary>
-		/// ポストのエンティティを取得します。
+		/// ポストの内容を取得します。
 		/// </summary>
 		/// <param name="postId"></param>
 		/// <returns></returns>
