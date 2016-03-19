@@ -21,28 +21,26 @@ namespace MSharp.API
 		/// ポストを投稿します。
 		/// </summary>
 		/// <param name="text"></param>
-		public async Task<PostEntity> Create(string text)
-		{
-			var body = new Dictionary<string, string>();
-			body.Add("text", text);
-
-			var res = await MisskeyRequest.POST(_Misskey.Session, "posts/create", body);
-			return new PostEntity(res.Content);
-		}
-
-		/// <summary>
-		/// ポストを投稿します。
-		/// </summary>
-		/// <param name="text"></param>
 		/// <param name="fileIds"></param>
 		public async Task<PostEntity> Create(string text, List<string> fileIds)
 		{
 			var body = new Dictionary<string, string>();
 			body.Add("text", text);
-			body.Add("files", string.Join(",", fileIds));
 
-			var res = await MisskeyRequest.POST(_Misskey.Session, "posts/create", body);
-			return new PostEntity(res.Content);
+			if (fileIds != null)
+			{
+				fileIds.RemoveAll(i => i == null);
+
+				if (fileIds.Count != 0)
+					body.Add("files", string.Join(",", fileIds));
+			}
+
+			var res = (await MisskeyRequest.POST(_Misskey.Session, "posts/create", body)).Content;
+
+			if (res == "content-duplicate")
+				throw new System.Exception("投稿内容が重複しています。");
+
+			return new PostEntity(res);
 		}
 
 		/// <summary>
@@ -64,10 +62,15 @@ namespace MSharp.API
 		{
 			var fileIds = new List<string>();
 
-			foreach (var file in files)
+			if (files != null)
 			{
-				var res = await _Misskey.Album.Upload(file);
-				fileIds.Add(res.Id);
+				files = files.FindAll(i => i != null);
+
+				foreach(var i in files)
+				{
+					var res = await _Misskey.Album.Upload(i);
+					fileIds.Add(res.Id);
+				}
 			}
 
 			return await Create(text, fileIds);
@@ -78,10 +81,9 @@ namespace MSharp.API
 		/// </summary>
 		/// <param name="text"></param>
 		/// <param name="imageFile"></param>
-		public async Task<PostEntity> Create(string text, IFile file)
+		public async Task<PostEntity> Create(string text, IFile file = null)
 		{
-			var res = await _Misskey.Album.Upload(file);
-			return await Create(text, res.Id);
+			return await Create(text, new List<IFile> { file });
 		}
 	}
 }
