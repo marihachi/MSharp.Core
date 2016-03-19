@@ -48,7 +48,7 @@ namespace MSharp.Data.Entity
 				LikesCount = j.likesCount() ? (int?)j.likesCount : null;
 				NextPostId = j.nextPost() ? j.nextPost : null;
 				Post = j.post() ? new PostEntity(j.post.ToString()) : null;
-				PreviousPostId = j.prevPost() ? j.prevPost : null; ;
+				PreviousPostId = j.prevPost() ? j.prevPost : null;
 				RepliesCount = j.repliesCount() ? (int?)j.repliesCount : null;
 				RepostsCount = j.repostsCount() ? (int?)j.repostsCount : null;
 				Text = j.text() ? j.text : null;
