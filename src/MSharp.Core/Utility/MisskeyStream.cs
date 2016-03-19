@@ -115,9 +115,10 @@ namespace MSharp.Core.Utility
 				var res = await Request.GET($"{streamUrl.Scheme}://{streamUrl.Host}:{streamUrl.Port}/socket.io/?EIO=3&transport=polling", null, cookie);
 
 				var configSrc = res.Content.Substring(5);
+				var config = DynamicJson.Parse(configSrc);
 
-				var sid = Regex.Match(configSrc, "\"sid\":\"?(.+?)\"?,").Groups[1].Value;
-				var pingInterval = int.Parse(Regex.Match(configSrc, "\"pingInterval\":\"?(.+?)\"?,").Groups[1].Value);
+				var sid = config.sid;
+				var pingInterval = (int)config.pingInterval;
 
 				var content = new StringContent("17:40" + EndPoint);
 				res = await Request.POST($"{streamUrl.Scheme}://{streamUrl.Host}:{streamUrl.Port}/socket.io/?EIO=3&transport=polling&sid={sid}", content, cookie);
