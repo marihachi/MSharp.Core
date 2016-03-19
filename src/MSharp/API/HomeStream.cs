@@ -3,6 +3,8 @@ using MSharp.Core.Utility;
 using MSharp.Data.Entity;
 using MSharp.Data.EventArgs;
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace MSharp.API
 {
@@ -11,19 +13,29 @@ namespace MSharp.API
 		public HomeStream(Misskey misskey)
 			: base(misskey.Session, "/streaming/home")
 		{
-			MessageRecieved += (s, ev) =>
+			MessageRecieved += async(s, ev) =>
 			{
 				var json = DynamicJson.Parse(ev.JsonData);
 
 				if (json[0] == "post")
 				{
 					string post = json[1].ToString();
-					OnPostRecieved(new PostRecieveEventArgs(new PostEntity(post)));
+					var eventArgs = new PostRecieveEventArgs(new PostEntity(post));
+
+					await Task.Factory.StartNew(() =>
+					{
+						OnPostRecieved(eventArgs);
+					}, CancellationToken.None, TaskCreationOptions.None, SyncTaskScheduler);
 				}
 				else if (json[0] == "notification")
 				{
 					string notification = json[1].ToString();
-					OnNotificationRecieved(new NotificationRecieveEventArgs(new NotificationEntity(notification)));
+					var eventArgs = new NotificationRecieveEventArgs(new NotificationEntity(notification));
+
+					await Task.Factory.StartNew(() =>
+					{
+						OnNotificationRecieved(eventArgs);
+					}, CancellationToken.None, TaskCreationOptions.None, SyncTaskScheduler);
 				}
 				else
 				{

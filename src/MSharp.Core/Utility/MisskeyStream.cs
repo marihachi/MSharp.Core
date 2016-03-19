@@ -4,8 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Http;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using WebSocketSharp;
@@ -84,15 +82,9 @@ namespace MSharp.Core.Utility
 				MessageRecieved(this, new MessageRecieveEventArgs(json));
 		}
 
-		private void _Dispatch(Action action, TaskScheduler taskScheduler)
-		{
-			Task.Factory.StartNew(() =>
-			{
-				action();
-			}, CancellationToken.None, TaskCreationOptions.None, taskScheduler).Wait();
-		}
-
 		private CancellationTokenSource _Canceller { get; set; }
+
+		protected TaskScheduler SyncTaskScheduler { get; set; }
 
 		/// <summary>
 		/// ストリームに接続します。
@@ -100,42 +92,43 @@ namespace MSharp.Core.Utility
 		/// <returns></returns>
 		public virtual async Task ConnectAsync(bool isReconnect)
 		{
-			var taskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+			SyncTaskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
 			_Canceller = new CancellationTokenSource();
 
 			connectStart:
 
 			try
 			{
-				var cookie = new Dictionary<string, string>();
-				cookie.Add(Session.Config.SessionKeyName, Session.SessionKey);
-
-				var streamUrl = Session.Config.StreamingApiUrl;
-
-				var res = await Request.GET($"{streamUrl.Scheme}://{streamUrl.Host}:{streamUrl.Port}/socket.io/?EIO=3&transport=polling", null, cookie);
-
-				var configSrc = res.Content.Substring(5);
-				var config = DynamicJson.Parse(configSrc);
-
-				var sid = config.sid;
-				var pingInterval = (int)config.pingInterval;
-
-				var content = new StringContent("17:40" + EndPoint);
-				res = await Request.POST($"{streamUrl.Scheme}://{streamUrl.Host}:{streamUrl.Port}/socket.io/?EIO=3&transport=polling&sid={sid}", content, cookie);
-
-				await Task.Factory.StartNew(() =>
+				await Task.Run(async () =>
 				{
+					var cookie = new Dictionary<string, string>();
+					cookie.Add(Session.Config.SessionKeyName, Session.SessionKey);
+
+					var streamUrl = Session.Config.StreamingApiUrl;
+
+					var res = await Request.GET($"{streamUrl.Scheme}://{streamUrl.Host}:{streamUrl.Port}/socket.io/?EIO=3&transport=polling", null, cookie);
+
+					var configSrc = res.Content.Substring(5);
+					var config = DynamicJson.Parse(configSrc);
+
+					var sid = config.sid;
+					var pingInterval = (int)config.pingInterval;
+
+					var content = new StringContent("17:40" + EndPoint);
+					res = await Request.POST($"{streamUrl.Scheme}://{streamUrl.Host}:{streamUrl.Port}/socket.io/?EIO=3&transport=polling&sid={sid}", content, cookie);
+
 					using (var ws = new WebSocket($"{(streamUrl.Scheme == "https" ? "wss" : "ws")}://{streamUrl.Host}:{streamUrl.Port}/socket.io/?EIO=3&transport=websocket&sid={sid}"))
 					{
-						ws.OnMessage += (s, ev) =>
+						ws.OnMessage += async(s, ev) =>
 						{
 							if (ev.Data == "3probe")
 							{
 								ws.Send("5");
-								_Dispatch(() =>
+
+								await Task.Factory.StartNew(() =>
 								{
 									OnStreamConnected();
-								}, taskScheduler);
+								}, CancellationToken.None, TaskCreationOptions.None, SyncTaskScheduler);
 							}
 							else if (ev.Data[0] != '3')
 							{
@@ -146,10 +139,7 @@ namespace MSharp.Core.Utility
 									var source = ev.Data.Substring(2);
 									var json = source.Substring(source.IndexOf(',') + 1);
 
-									_Dispatch(() =>
-									{
-										OnMessageRecieved(json);
-									}, taskScheduler);
+									OnMessageRecieved(json);
 								}
 							}
 						};
@@ -164,14 +154,13 @@ namespace MSharp.Core.Utility
 							Task.Delay(pingInterval, _Canceller.Token).Wait();
 							ws.Send("2");
 						}
-						
 					}
 				}, _Canceller.Token);
 			}
 			catch (AggregateException ex)
 			{
 				var exs = ex.InnerExceptions;
-				foreach(var i in exs)
+				foreach (var i in exs)
 				{
 					if (!(i is TaskCanceledException))
 					{
@@ -194,10 +183,10 @@ namespace MSharp.Core.Utility
 
 			IsConnecting = false;
 
-			_Dispatch(() =>
+			await Task.Factory.StartNew(() =>
 			{
 				OnStreamDisconnected();
-			}, taskScheduler);
+			}, CancellationToken.None, TaskCreationOptions.None, SyncTaskScheduler);
 
 			if (isReconnect && !_Canceller.IsCancellationRequested)
 			{
