@@ -13,11 +13,30 @@ namespace MSharp.Data.Entity
 	/// </summary>
 	public abstract class PostEntity
 	{
-		public PostEntity(string jsonString)
+		public static async Task<PostEntity> Create(string postJsonString)
+		{
+			return await Task.Run(async() =>
+			{
+				PostEntity post = null;
+				var j = DynamicJson.Parse(postJsonString);
+
+				if (j.type == "status")
+					post = StatusEntity.Create(j);
+				else if (j.type == "reply")
+					post = await ReplyEntity.Create(j);
+				else if (j.type == "repost")
+					post = await RepostEntity.Create(j);
+				else
+					throw new MSharpEntityException($"PostType '{j.type}'は不明です。");
+				return post;
+			});
+		}
+
+		protected void Initialize(DynamicJson json)
 		{
 			try
 			{
-				var j = DynamicJson.Parse(jsonString);
+				dynamic j = json;
 
 				Id = j.id;
 				ApplicationId = j.app() ? j.app : null;
@@ -38,24 +57,6 @@ namespace MSharp.Data.Entity
 			{
 				throw new MSharpEntityException("JSONのパースに失敗しました。", ex);
 			}
-		}
-
-		public static PostEntity ConvertPostEntity(string postJsonString)
-		{
-			var j = DynamicJson.Parse(postJsonString);
-
-			PostEntity post;
-
-			if (j.type == "status")
-				post = new StatusEntity(j.ToString());
-			else if (j.type == "reply")
-				post = new ReplyEntity(j.ToString());
-			else if (j.type == "repost")
-				post = new RepostEntity(j.ToString());
-			else
-				throw new MSharpEntityException($"PostType '{j.type}'は不明です。");
-
-			return post;
 		}
 
 		public PostType Type { get; set; } = PostType.Unknown;
@@ -80,14 +81,24 @@ namespace MSharp.Data.Entity
 	/// </summary>
 	public class StatusEntity : PostEntity
 	{
-		public StatusEntity(string jsonString)
-			: base(jsonString)
+		public static StatusEntity Create(DynamicJson json)
 		{
+			var entity = new StatusEntity();
+			entity.Initialize(json);
+			return entity;
+		}
+
+		protected StatusEntity() { }
+
+		protected new void Initialize(DynamicJson json)
+		{
+			base.Initialize(json);
+
 			try
 			{
-				var j = DynamicJson.Parse(jsonString);
+				dynamic j = json;
 
-				if (j.type != "status")
+				if (!(j.type == "status" || j.type == "reply"))
 					throw new ArgumentException("与えられたJSONデータがStatusではありません。");
 
 				Type = PostType.Status;
@@ -121,27 +132,36 @@ namespace MSharp.Data.Entity
 	/// </summary>
 	public class ReplyEntity : StatusEntity
 	{
-		public ReplyEntity(string jsonString)
-			: base(jsonString)
+		public static async new Task<ReplyEntity> Create(DynamicJson json)
 		{
+			var entity = new ReplyEntity();
+			await entity.Initialize(json);
+			return entity;
+		}
+
+		protected ReplyEntity() { }
+
+		public async new Task Initialize(DynamicJson json)
+		{
+			base.Initialize(json);
+
+			dynamic j = json;
+
+			if (j.type != "reply")
+				throw new ArgumentException("与えられたJSONデータがReplyではありません。");
+
+			if (!j.inReplyToPostId() || !j.inReplyToPost() || j.inReplyToPost == null || j.inReplyToPostId == null)
+				throw new MSharpEntityException("Replyとして判断されたオブジェクトにinReplyToPostId要素またはinReplyToPost要素の少なくともどちらかの要素が存在しませんでした。");
+
+			Type = PostType.Reply;
+
 			try
 			{
-				var j = DynamicJson.Parse(jsonString);
+				// 中身がポストオブジェクトであれば
+				if (j.inReplyToPost.ToString() != j.inReplyToPostId)
+					_InReplyToPost = await Create((string)j.inReplyToPost.ToString());
 
-				if (j.type == "reply")
-					throw new ArgumentException("与えられたJSONデータがReplyではありません。");
-
-				Type = PostType.Reply;
-
-				if (j.inReplyToPostId() && j.inReplyToPost() && j.inReplyToPostId != null)
-				{
-					// 中身がポストオブジェクトであれば
-					if (j.inReplyToPost.ToString() != j.inReplyToPostId)
-					{
-						_InReplyToPost = ConvertPostEntity(j.inReplyToPost.ToString());
-					}
-					_InReplyToPostId = j.inReplyToPostId;
-				}
+				_InReplyToPostId = j.inReplyToPostId;
 			}
 			catch (Exception ex)
 			{
@@ -158,7 +178,7 @@ namespace MSharp.Data.Entity
 					if (_InReplyToPost == null)
 					{
 						var post = await MisskeyRequest.POST(null, "posts/show", new Dictionary<string, string> { { "post-id", _InReplyToPostId } });
-						_InReplyToPost = ConvertPostEntity(post.Content);
+						_InReplyToPost = await Create(post.Content);
 					}
 					return _InReplyToPost;
 				});
@@ -174,19 +194,29 @@ namespace MSharp.Data.Entity
 	/// </summary>
 	public class RepostEntity : PostEntity
 	{
-		public RepostEntity(string jsonString)
-			: base(jsonString)
+		public static async Task<RepostEntity> Create(DynamicJson json)
 		{
+			var entity = new RepostEntity();
+			await entity.Initialize(json);
+			return entity;
+		}
+
+		protected RepostEntity() { }
+
+		public async new Task Initialize(DynamicJson json)
+		{
+			base.Initialize(json);
+
+			dynamic j = json;
+
+			if (j.type != "repost")
+				throw new ArgumentException("与えられたJSONデータがRepostではありません。");
+
+			Type = PostType.Repost;
+
 			try
 			{
-				var j = DynamicJson.Parse(jsonString);
-
-				if (j.type == "repost")
-					throw new ArgumentException("与えられたJSONデータがRepostではありません。");
-
-				Type = PostType.Repost;
-
-				Post = j.post() ? ConvertPostEntity(j.post.ToString()) : null;
+				TargetPost = j.post() ? await PostEntity.Create((string)j.post.ToString()) : null;
 			}
 			catch (Exception ex)
 			{
@@ -194,6 +224,6 @@ namespace MSharp.Data.Entity
 			}
 		}
 
-		public PostEntity Post { get; set; }
+		public PostEntity TargetPost { get; set; }
 	}
 }

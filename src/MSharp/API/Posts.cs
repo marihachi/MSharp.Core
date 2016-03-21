@@ -40,7 +40,7 @@ namespace MSharp.API
 			if (res == "not-found")
 				throw new ArgumentException("指定されたpostIdのポストは見つかりませんでした。");
 
-			return PostEntity.ConvertPostEntity(res);
+			return await PostEntity.Create(res);
 		}
 
 		/// <summary>
@@ -69,7 +69,7 @@ namespace MSharp.API
 			if (res == "content-duplicate")
 				throw new MSharpApiException("投稿内容が重複しています。");
 
-			return PostEntity.ConvertPostEntity(res);
+			return await PostEntity.Create(res);
 		}
 
 		/// <summary>
@@ -142,7 +142,7 @@ namespace MSharp.API
 			var postList = new List<PostEntity>();
 
 			foreach (var post in DynamicJson.Parse(res))
-				postList.Add(PostEntity.ConvertPostEntity(post.ToString()));
+				postList.Add(await PostEntity.Create(post.ToString()));
 
 			return postList;
 		}
@@ -188,7 +188,7 @@ namespace MSharp.API
 			var postList = new List<PostEntity>();
 
 			foreach (var post in DynamicJson.Parse(res))
-				postList.Add(PostEntity.ConvertPostEntity(post.ToString()));
+				postList.Add(await PostEntity.Create(post.ToString()));
 
 			return postList;
 		}

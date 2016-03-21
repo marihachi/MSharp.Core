@@ -14,7 +14,7 @@ namespace MSharp.API
 		public HomeStream(Misskey misskey)
 			: base(misskey.Session, "/streaming/home")
 		{
-			MessageRecieved += async(s, ev) =>
+			MessageRecieved += async (s, ev) =>
 			{
 				var json = DynamicJson.Parse(ev.JsonData);
 
@@ -27,7 +27,7 @@ namespace MSharp.API
 				{
 					string post = json[1].ToString();
 					Debug.WriteLine("Get post type json from streaming: " + post);
-					var eventArgs = new PostRecieveEventArgs(PostEntity.ConvertPostEntity(post));
+					var eventArgs = new PostRecieveEventArgs(await PostEntity.Create(post));
 
 					await Task.Factory.StartNew(() =>
 					{
