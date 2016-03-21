@@ -1,7 +1,8 @@
 ﻿using Codeplex.Data;
+using MSharp.Core;
+using MSharp.Core.Data.Exceptions;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 
 namespace MSharp.Data.Entity
@@ -12,7 +13,6 @@ namespace MSharp.Data.Entity
 		{
 			try
 			{
-				Debug.WriteLine("AlbumFile: " + jsonString);
 				var j = DynamicJson.Parse(jsonString);
 
 				Id = j.id;
@@ -44,9 +44,9 @@ namespace MSharp.Data.Entity
 				Url = j.url() && !string.IsNullOrEmpty(j.url) ? new Uri(j.url) : null;
 				ThumbnailUrl = j.thumbnailUrl() && !string.IsNullOrEmpty(j.thumbnailUrl) ? new Uri(j.thumbnailUrl) : null;
 			}
-			catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException ex)
+			catch (Exception ex)
 			{
-				Debug.WriteLine(ex.Message);
+				throw new MSharpEntityException("JSONのパースに失敗しました。", ex);
 			}
 		}
 

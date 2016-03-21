@@ -2,6 +2,7 @@
 using MSharp.Core.Utility;
 using MSharp.Data.Entity;
 using MSharp.Data.EventArgs;
+using MSharp.Core.Data.Exceptions;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,10 +18,16 @@ namespace MSharp.API
 			{
 				var json = DynamicJson.Parse(ev.JsonData);
 
+				var array = (dynamic[])json;
+
+				if (array.Length != 2)
+					new MSharpApiException("受信されたメッセージの内容が想定外です。");
+
 				if (json[0] == "post")
 				{
 					string post = json[1].ToString();
-					var eventArgs = new PostRecieveEventArgs(new PostEntity(post));
+					Debug.WriteLine("Get post type json from streaming: " + post);
+					var eventArgs = new PostRecieveEventArgs(PostEntity.ConvertPostEntity(post));
 
 					await Task.Factory.StartNew(() =>
 					{
@@ -39,9 +46,7 @@ namespace MSharp.API
 				}
 				else
 				{
-					Debug.WriteLine($"不明なイベントが発行されました。");
-					Debug.WriteLine($"イベント名: {json[0]}");
-					Debug.WriteLine($"内容: {json[1]}");
+					throw new MSharpApiException($"不明なイベントが発行されました。\r\nイベント名: {json[0]}\r\n内容: {json[1]}");
 				}
 			};
 		}

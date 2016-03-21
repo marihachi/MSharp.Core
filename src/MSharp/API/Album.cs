@@ -1,6 +1,7 @@
 ﻿using MSharp.Core.Utility;
 using MSharp.Data;
 using MSharp.Data.Entity;
+using MSharp.Core.Data.Exceptions;
 using System.Collections.Generic;
 using System.Drawing.Imaging;
 using System.IO;
@@ -64,7 +65,7 @@ namespace MSharp.API
 			}
 			else
 			{
-				throw new System.Exception("ファイルの種類が不明です。");
+				throw new MSharpApiException("ファイルの種類が不明です。");
 			}
 
 			var folder = new StringContent("null");

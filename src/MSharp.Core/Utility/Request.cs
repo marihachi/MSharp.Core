@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net;
 using MSharp.Core.Data;
+using MSharp.Core.Data.Exceptions;
 
 namespace MSharp.Core.Utility
 {
@@ -45,7 +46,7 @@ namespace MSharp.Core.Utility
 				}
 				catch (Exception ex)
 				{
-					throw new Exception("リクエスト時にエラーが発生しました。", ex);
+					throw new MSharpApiException("リクエスト時にエラーが発生しました。", ex);
 				}
 			}
 		}
@@ -114,7 +115,7 @@ namespace MSharp.Core.Utility
 				}
 				catch (Exception ex)
 				{
-					throw new Exception("リクエスト時にエラーが発生しました。", ex);
+					throw new MSharpApiException("リクエスト時にエラーが発生しました。", ex);
 				}
 
 				string a;

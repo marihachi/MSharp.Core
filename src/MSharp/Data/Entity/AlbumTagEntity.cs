@@ -1,5 +1,7 @@
 ﻿using Codeplex.Data;
-using System.Diagnostics;
+using MSharp.Core;
+using MSharp.Core.Data.Exceptions;
+using System;
 
 namespace MSharp.Data.Entity
 {
@@ -9,7 +11,6 @@ namespace MSharp.Data.Entity
 		{
 			try
 			{
-				Debug.WriteLine("AlbumTag: " + jsonString);
 				var j = DynamicJson.Parse(jsonString);
 
 				Id = j.id;
@@ -17,9 +18,9 @@ namespace MSharp.Data.Entity
 				Name = j.name() ? j.name : null;
 				UserId = j.user() ? j.user : null;
 			}
-			catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException ex)
+			catch (Exception ex)
 			{
-				Debug.WriteLine(ex.Message);
+				throw new MSharpEntityException("JSONのパースに失敗しました。", ex);
 			}
 		}
 

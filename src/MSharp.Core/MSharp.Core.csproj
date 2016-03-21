@@ -49,6 +49,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config.cs" />
+    <Compile Include="Data\Exceptions\MSharpApiException.cs" />
+    <Compile Include="Data\Exceptions\MSharpEntityException.cs" />
+    <Compile Include="Data\Exceptions\MSharpGeneralException.cs" />
     <Compile Include="Data\HttpResponse.cs" />
     <Compile Include="Data\MessageRecieveEventArgs.cs" />
     <Compile Include="DynamicJson.cs" />

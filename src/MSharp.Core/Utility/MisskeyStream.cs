@@ -102,9 +102,9 @@ namespace MSharp.Core.Utility
 				await Task.Run(async () =>
 				{
 					var cookie = new Dictionary<string, string>();
-					cookie.Add(Session.Config.SessionKeyName, Session.SessionKey);
+					cookie.Add(Config.SessionKeyName, Session.SessionKey);
 
-					var streamUrl = Session.Config.StreamingApiUrl;
+					var streamUrl = Config.StreamingApiUrl;
 
 					var res = await Request.GET($"{streamUrl.Scheme}://{streamUrl.Host}:{streamUrl.Port}/socket.io/?EIO=3&transport=polling", null, cookie);
 

@@ -3,6 +3,7 @@ using MSharp.Core.Utility;
 using MSharp.Data;
 using MSharp.Data.Entity;
 using MSharp.Data.Entity.Enum;
+using MSharp.Core.Data.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -39,7 +40,7 @@ namespace MSharp.API
 			if (res == "not-found")
 				throw new ArgumentException("指定されたpostIdのポストは見つかりませんでした。");
 
-			return new PostEntity(res);
+			return PostEntity.ConvertPostEntity(res);
 		}
 
 		/// <summary>
@@ -66,9 +67,9 @@ namespace MSharp.API
 			var res = (await MisskeyRequest.POST(_Misskey.Session, "posts/create", body)).Content;
 
 			if (res == "content-duplicate")
-				throw new Exception("投稿内容が重複しています。");
+				throw new MSharpApiException("投稿内容が重複しています。");
 
-			return new PostEntity(res);
+			return PostEntity.ConvertPostEntity(res);
 		}
 
 		/// <summary>
@@ -141,7 +142,7 @@ namespace MSharp.API
 			var postList = new List<PostEntity>();
 
 			foreach (var post in DynamicJson.Parse(res))
-				postList.Add(new PostEntity(post.ToString()));
+				postList.Add(PostEntity.ConvertPostEntity(post.ToString()));
 
 			return postList;
 		}
@@ -187,7 +188,7 @@ namespace MSharp.API
 			var postList = new List<PostEntity>();
 
 			foreach (var post in DynamicJson.Parse(res))
-				postList.Add(new PostEntity(post.ToString()));
+				postList.Add(PostEntity.ConvertPostEntity(post.ToString()));
 
 			return postList;
 		}
