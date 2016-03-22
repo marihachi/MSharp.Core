@@ -99,7 +99,7 @@ namespace MSharp.Data.Entity
 				dynamic j = json;
 
 				if (!(j.type == "status" || j.type == "reply"))
-					throw new ArgumentException("与えられたJSONデータがStatusではありません。");
+					throw new ArgumentException("与えられたJSONデータがStatusまたはその派生したタイプではありません。");
 
 				Type = PostType.Status;
 				if (j.files() && j.files != null)
