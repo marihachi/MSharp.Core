@@ -87,7 +87,7 @@ namespace MSharp.API
 		/// </summary>
 		/// <param name="text"></param>
 		/// <param name="files"></param>
-		public async Task<PostEntity> Create(string text, List<IFile> files)
+		public async Task<PostEntity> Create(string text, List<File> files)
 		{
 			var fileIds = new List<string>();
 
@@ -110,9 +110,9 @@ namespace MSharp.API
 		/// </summary>
 		/// <param name="text"></param>
 		/// <param name="imageFile"></param>
-		public async Task<PostEntity> Create(string text, IFile file = null)
+		public async Task<PostEntity> Create(string text, File file = null)
 		{
-			return await Create(text, new List<IFile> { file });
+			return await Create(text, new List<File> { file });
 		}
 
 		/// <summary>

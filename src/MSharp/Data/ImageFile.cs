@@ -6,7 +6,7 @@ namespace MSharp.Data
 	/// <summary>
 	/// 画像ファイルを表します。
 	/// </summary>
-	public class ImageFile : IFile
+	public class ImageFile : File
 	{
 		public ImageFile(string filePath)
 		{
@@ -19,11 +19,6 @@ namespace MSharp.Data
 			FileName = fileName;
 			Data = data;
 		}
-
-		/// <summary>
-		/// ファイル名を取得します。
-		/// </summary>
-		public string FileName { get; private set; }
 
 		/// <summary>
 		/// イメージデータを取得します。

@@ -1,10 +1,10 @@
 ﻿namespace MSharp.Data
 {
 	/// <summary>
-	/// ファイルを表すメンバを公開します。
+	/// ファイルを表すクラスです。
 	/// </summary>
-	public interface IFile
+	public abstract class File
 	{
-		string FileName { get; }
+		public string FileName { get; protected set; }
 	}
 }

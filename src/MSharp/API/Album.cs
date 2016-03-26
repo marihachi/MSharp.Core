@@ -20,7 +20,7 @@ namespace MSharp.API
 		}
 		private Misskey _Misskey { get; set; }
 
-		public async Task<AlbumFileEntity> Upload(IFile file)
+		public async Task<AlbumFileEntity> Upload(Data.File file)
 		{
 			var contents = new List<HttpContent>();
 
