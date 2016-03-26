@@ -37,7 +37,7 @@ namespace MSharp.API
 				else if (json[0] == "notification")
 				{
 					string notification = json[1].ToString();
-					var eventArgs = new NotificationRecieveEventArgs(new NotificationEntity(notification));
+					var eventArgs = new NotificationRecieveEventArgs(NotificationEntity.Create(notification));
 
 					await Task.Factory.StartNew(() =>
 					{

@@ -15,9 +15,10 @@ namespace MSharp.Data.Entity
 	{
 		public static async Task<PostEntity> Create(string postJsonString)
 		{
-			return await Task.Run(async() =>
+			return await Task.Run(async () =>
 			{
 				PostEntity post = null;
+
 				var j = DynamicJson.Parse(postJsonString);
 
 				if (j.type == "status")
@@ -28,6 +29,7 @@ namespace MSharp.Data.Entity
 					post = await RepostEntity.Create(j);
 				else
 					throw new MSharpEntityException($"PostType '{j.type}'は不明です。");
+
 				return post;
 			});
 		}
@@ -37,6 +39,15 @@ namespace MSharp.Data.Entity
 			try
 			{
 				dynamic j = json;
+
+				if (j.type == "status")
+					Type = PostType.Status;
+
+				if (j.type == "reply")
+					Type = PostType.Reply;
+
+				if (j.type == "repost")
+					Type = PostType.Repost;
 
 				Id = j.id;
 				ApplicationId = j.app() ? j.app : null;
@@ -98,10 +109,6 @@ namespace MSharp.Data.Entity
 			{
 				dynamic j = json;
 
-				if (!(j.type == "status" || j.type == "reply"))
-					throw new ArgumentException("与えられたJSONデータがStatusまたはその派生したタイプではありません。");
-
-				Type = PostType.Status;
 				if (j.files() && j.files != null)
 				{
 					Files = new List<AlbumFileEntity>();
@@ -147,13 +154,8 @@ namespace MSharp.Data.Entity
 
 			dynamic j = json;
 
-			if (j.type != "reply")
-				throw new ArgumentException("与えられたJSONデータがReplyではありません。");
-
 			if (!j.inReplyToPostId() || !j.inReplyToPost() || j.inReplyToPost == null || j.inReplyToPostId == null)
 				throw new MSharpEntityException("Replyとして判断されたオブジェクトにinReplyToPostId要素またはinReplyToPost要素の少なくともどちらかの要素が存在しませんでした。");
-
-			Type = PostType.Reply;
 
 			try
 			{
@@ -208,11 +210,6 @@ namespace MSharp.Data.Entity
 			base.Initialize(json);
 
 			dynamic j = json;
-
-			if (j.type != "repost")
-				throw new ArgumentException("与えられたJSONデータがRepostではありません。");
-
-			Type = PostType.Repost;
 
 			try
 			{

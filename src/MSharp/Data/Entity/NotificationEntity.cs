@@ -1,23 +1,18 @@
 ﻿using Codeplex.Data;
+using MSharp.Core.Data.Exceptions;
 using MSharp.Data.Entity.Enum;
 using System;
 using System.Diagnostics;
 
 namespace MSharp.Data.Entity
 {
-	public class NotificationEntity :
-		INotification,
-		ISelfNotification,
-		ILikeNotification,
-		IRepostNotification,
-		IFollowNotification,
-		IMentionNotification
+	public abstract class NotificationEntity
 	{
-		public NotificationEntity(string jsonString)
+		public NotificationEntity(DynamicJson json)
 		{
 			try
 			{
-				var j = DynamicJson.Parse(jsonString);
+				dynamic j = json;
 
 				if (j.type == "self-notification")
 					Type = NotificationType.SelfNotification;
@@ -47,6 +42,27 @@ namespace MSharp.Data.Entity
 			}
 		}
 
+		public static NotificationEntity Create(string jsonString)
+		{
+			NotificationEntity notify = null;
+			var j = DynamicJson.Parse(jsonString);
+
+			if (j.type == "self-notification")
+				notify = new SelfNotification(j);
+			else if (j.type == "like")
+				notify = new LikeNotification(j);
+			else if (j.type == "repost")
+				notify = new RepostNotification(j);
+			else if (j.type == "follow")
+				notify = new FollowNotification(j);
+			else if (j.type == "mention")
+				notify = new MentionNotification(j);
+			else
+				throw new MSharpEntityException($"NotificationType '{j.type}'は不明です。");
+
+			return notify;
+		}
+
 		public NotificationType Type { get; set; } = NotificationType.Unknown;
 		public string Id { get; set; }
 		public string ApplicationId { get; set; }
@@ -56,33 +72,28 @@ namespace MSharp.Data.Entity
 		public string UserId { get; set; }
 	}
 
-	public interface INotification
+	public class SelfNotification : NotificationEntity
 	{
-		string Id { get; set; }
-		string ApplicationId { get; set; }
-		DateTime CreatedAt { get; set; }
-		int? Cursor { get; set; }
-		bool? IsRead { get; set; }
-		string UserId { get; set; }
+		public SelfNotification(DynamicJson json) : base(json) { }
 	}
 
-	public interface ISelfNotification : INotification
+	public class LikeNotification : NotificationEntity
 	{
+		public LikeNotification(DynamicJson json) : base(json) { }
 	}
 
-	public interface ILikeNotification : INotification
+	public class RepostNotification : NotificationEntity
 	{
+		public RepostNotification(DynamicJson json) : base(json) { }
 	}
 
-	public interface IRepostNotification : INotification
+	public class FollowNotification : NotificationEntity
 	{
+		public FollowNotification(DynamicJson json) : base(json) { }
 	}
 
-	public interface IFollowNotification : INotification
+	public class MentionNotification : NotificationEntity
 	{
-	}
-
-	public interface IMentionNotification : INotification
-	{
+		public MentionNotification(DynamicJson json) : base(json) { }
 	}
 }
