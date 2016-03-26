@@ -72,14 +72,14 @@ namespace MSharp.Core.Utility
 		/// <summary>
 		/// メッセージを受信したときに発生します。
 		/// </summary>
-		public event MessageRecieveEventHandler MessageRecieved;
+		public event MessageReceiveEventHandler MessageReceived;
 
-		public delegate void MessageRecieveEventHandler(object sender, MessageRecieveEventArgs e);
+		public delegate void MessageReceiveEventHandler(object sender, MessageReceiveEventArgs e);
 
-		public void OnMessageRecieved(string json)
+		public void OnMessageReceived(string json)
 		{
-			if (MessageRecieved != null)
-				MessageRecieved(this, new MessageRecieveEventArgs(json));
+			if (MessageReceived != null)
+				MessageReceived(this, new MessageReceiveEventArgs(json));
 		}
 
 		private CancellationTokenSource _Canceller { get; set; }
@@ -139,7 +139,7 @@ namespace MSharp.Core.Utility
 									var source = ev.Data.Substring(2);
 									var json = source.Substring(source.IndexOf(',') + 1);
 
-									OnMessageRecieved(json);
+									OnMessageReceived(json);
 								}
 							}
 						};

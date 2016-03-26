@@ -53,7 +53,7 @@
     <Compile Include="Data\Exceptions\MSharpEntityException.cs" />
     <Compile Include="Data\Exceptions\MSharpGeneralException.cs" />
     <Compile Include="Data\HttpResponse.cs" />
-    <Compile Include="Data\MessageRecieveEventArgs.cs" />
+    <Compile Include="Data\MessageReceiveEventArgs.cs" />
     <Compile Include="DynamicJson.cs" />
     <Compile Include="SessionInfo.cs" />
     <Compile Include="Utility\Authorizer.cs" />

@@ -2,9 +2,9 @@
 
 namespace MSharp.Core.Data
 {
-	public class MessageRecieveEventArgs : EventArgs
+	public class MessageReceiveEventArgs : EventArgs
 	{
-		public MessageRecieveEventArgs(string json)
+		public MessageReceiveEventArgs(string json)
 		{
 			JsonData = json;
 		}
