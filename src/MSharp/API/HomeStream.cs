@@ -60,8 +60,7 @@ namespace MSharp.API
 
 		public void OnPostRecieved(PostRecieveEventArgs e)
 		{
-			if (PostRecieved != null)
-				PostRecieved(this, e);
+			PostRecieved?.Invoke(this, e);
 		}
 
 		/// <summary>
@@ -73,8 +72,7 @@ namespace MSharp.API
 
 		public void OnNotificationRecieved(NotificationRecieveEventArgs e)
 		{
-			if (NotificationRecieved != null)
-				NotificationRecieved(this, e);
+			NotificationRecieved?.Invoke(this, e);
 		}
 	}
 }

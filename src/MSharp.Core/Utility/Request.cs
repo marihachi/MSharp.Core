@@ -22,6 +22,8 @@ namespace MSharp.Core.Utility
 		/// <param name="additionalHeaders"></param>
 		public static async Task<HttpResponse> POST(string url, HttpContent content, Dictionary<string, string> cookies = null, Dictionary<string, string> additionalHeaders = null)
 		{
+			ServicePointManager.SecurityProtocol = Config.UseSecurityProtocol;
+
 			using (var handler = new HttpClientHandler { ClientCertificateOptions = ClientCertificateOption.Automatic, AutomaticDecompression = DecompressionMethods.GZip })
 			using (var client = new HttpClient(handler))
 			{
@@ -87,6 +89,8 @@ namespace MSharp.Core.Utility
 		/// </summary>
 		public static async Task<HttpResponse> GET(string url, Dictionary<string, string> param = null, Dictionary<string, string> cookies = null, Dictionary<string, string> headers = null)
 		{
+			ServicePointManager.SecurityProtocol = Config.UseSecurityProtocol;
+
 			param = param ?? new Dictionary<string, string>();
 
 			if (param.Count != 0)

@@ -3,6 +3,7 @@ using MSharp.Core.Data;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -52,8 +53,7 @@ namespace MSharp.Core.Utility
 
 		public void OnStreamConnected()
 		{
-			if (StreamConnected != null)
-				StreamConnected(this, new EventArgs());
+			StreamConnected?.Invoke(this, new EventArgs());
 		}
 
 		/// <summary>
@@ -65,8 +65,7 @@ namespace MSharp.Core.Utility
 
 		public void OnStreamDisconnected()
 		{
-			if (StreamDisconnected != null)
-				StreamDisconnected(this, new EventArgs());
+			StreamDisconnected?.Invoke(this, new EventArgs());
 		}
 
 		/// <summary>
@@ -78,8 +77,7 @@ namespace MSharp.Core.Utility
 
 		public void OnMessageReceived(string json)
 		{
-			if (MessageReceived != null)
-				MessageReceived(this, new MessageReceiveEventArgs(json));
+				MessageReceived?.Invoke(this, new MessageReceiveEventArgs(json));
 		}
 
 		private CancellationTokenSource _Canceller { get; set; }
@@ -117,6 +115,7 @@ namespace MSharp.Core.Utility
 					var content = new StringContent("17:40" + EndPoint);
 					res = await Request.POST($"{streamUrl.Scheme}://{streamUrl.Host}:{streamUrl.Port}/socket.io/?EIO=3&transport=polling&sid={sid}", content, cookie);
 
+					ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 					using (var ws = new WebSocket($"{(streamUrl.Scheme == "https" ? "wss" : "ws")}://{streamUrl.Host}:{streamUrl.Port}/socket.io/?EIO=3&transport=websocket&sid={sid}"))
 					{
 						ws.OnMessage += async(s, ev) =>
